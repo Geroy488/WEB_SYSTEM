@@ -59,6 +59,7 @@ namespace WEB_SYSTEM.Controllers
 
             return Ok("Successfully added campus");
         }
+
         [HttpPut("update")]
         public async Task<IActionResult> UpdateCampus([FromQuery] int id, [FromQuery] string newCampusName)
         {

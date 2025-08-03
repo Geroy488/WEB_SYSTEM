@@ -22,7 +22,7 @@ namespace WEB_SYSTEM.Models
             public string? Username { get; set; }
             public string? Password { get; set; }
         }
-        public class Students
+        public class Student
         {
             [Key]
             [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

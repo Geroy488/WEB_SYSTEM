@@ -1,12 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 using WEB_SYSTEM.Data;
-using WEB_SYSTEM.Models;
 using static WEB_SYSTEM.Models.InventoryModel;
-
-
 
 namespace WEB_SYSTEM.Controllers
 {
@@ -24,7 +19,7 @@ namespace WEB_SYSTEM.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromQuery] string Student_Name, [FromQuery] string Address, [FromQuery] string Tel_No, [FromQuery] string Grade, [FromQuery] string Section)
         {
-            var student = await _context.Student
+            var student = await _context.Students
                 .FirstOrDefaultAsync(s => s.Student_Name == Student_Name && s.Address == Address && s.Tel_No == Tel_No && s.Grade == Grade && s.Section == Section);
 
             if (student == null)
@@ -38,7 +33,7 @@ namespace WEB_SYSTEM.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Students>>> GetStudents()
         {
-            var student = await _context.Student.ToListAsync();
+            var student = await _context.Students.ToListAsync();
 
             if (student == null || student.Count == 0)
             {
@@ -48,57 +43,102 @@ namespace WEB_SYSTEM.Controllers
             return Ok(student);
         }
 
-        [HttpPut("update")]
-        public async Task<IActionResult> UpdateStudent([FromQuery] int id, [FromQuery] string newStudent_Name)
+        [HttpPost("add")]
+        public async Task<IActionResult> AddStudents([FromQuery] string student_Name, string Address, string Tel_No, string Grade, string Section)
         {
-            if (string.IsNullOrWhiteSpace(newStudent_Name) || newStudent_Name.Length <= 1)
+            if (string.IsNullOrWhiteSpace(student_Name) || student_Name.Length <= 1)
             {
                 return BadRequest("Invalid student name.");
             }
 
-            newStudent_Name = newStudent_Name.Trim();
-
-            if (int.TryParse(newStudent_Name, out _))
+            student_Name = student_Name.Trim();
+     
+            if (int.TryParse(student_Name, out _))
             {
                 return BadRequest("Student name cannot be numeric.");
             }
 
-            var existingStudents = await _context.Student.FindAsync(id);
-            if (existingStudents == null)
+            bool exists = await _context.Students
+                .AnyAsync(c => (c.Student_Name ?? "").ToLower() == student_Name.ToLower());
+
+
+            if (exists)
             {
-                return NotFound($"Student with ID {id} not found.");
+                return BadRequest("Student name already exists.");
             }
 
-            // Check if another campus already has the same name
-            bool duplicate = await _context.Student
-                .AnyAsync(c => c.Student_Name.ToLower() == newStudent_Name.ToLower() && c.Student_Id != id);
+            var student = new Student
+            {
+                Student_Name = student_Name,
+                Address = Address,
+                Tel_No = Tel_No,
+                Grade = Grade,
+                Section = Section
+            };
+
+            _context.Students.Add(student);
+            await _context.SaveChangesAsync();
+
+            return Ok("Successfully added student");
+        }
+
+        [HttpPut("update")]
+        public async Task<IActionResult> UpdateStudent([FromQuery] int student_Id, [FromQuery] Student updatedStudent)
+        {
+            if (string.IsNullOrWhiteSpace(updatedStudent.Student_Name) || updatedStudent.Student_Name.Length <= 1)
+            {
+                return BadRequest("Invalid student name.");
+            }
+
+            updatedStudent.Student_Name = updatedStudent.Student_Name.Trim();
+
+            if (int.TryParse(updatedStudent.Student_Name, out _))
+            {
+                return BadRequest("Student name cannot be numeric.");
+            }
+
+            var existingStudent = await _context.Students.FindAsync(student_Id);
+            if (existingStudent == null)
+            {
+                return NotFound($"Student with ID {student_Id} not found.");
+            }
+
+            bool duplicate = await _context.Students
+                .AnyAsync(c => c.Student_Name.ToLower() == updatedStudent.Student_Name.ToLower() && c.Student_Id != student_Id);
 
             if (duplicate)
             {
                 return BadRequest("Another student with the same name already exists.");
             }
 
-            existingStudents.Student_Name = newStudent_Name;
+            // Update all fields
+            existingStudent.Student_Name = updatedStudent.Student_Name;
+            existingStudent.Address = updatedStudent.Address?.Trim();
+            existingStudent.Tel_No = updatedStudent.Tel_No?.Trim();
+            existingStudent.Grade = updatedStudent.Grade?.Trim();
+            existingStudent.Section = updatedStudent.Section?.Trim();
+
             await _context.SaveChangesAsync();
 
             return Ok("Student updated successfully.");
         }
+
         // DELETE: api/campuses/delete?id=1
         [HttpDelete("delete")]
-        public async Task<IActionResult> DeleteStudent([FromQuery] int Id)
+        public async Task<IActionResult> DeleteStudent([FromQuery] int student_Id)
         {
-            var student = await _context.Student.FindAsync(Id);
+            var student = await _context.Students.FindAsync(student_Id);
 
             if (student == null)
             {
-                return NotFound($"Student with ID {Id} not found.");
+                return NotFound($"Student with ID {student_Id} not found.");
             }
 
-            _context.Student.Remove(student);
+            _context.Students.Remove(student);
             await _context.SaveChangesAsync();
 
             return Ok("Campus deleted successfully.");
         }
-
     }
 }
+

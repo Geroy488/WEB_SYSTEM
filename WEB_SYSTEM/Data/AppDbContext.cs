@@ -12,6 +12,6 @@ namespace WEB_SYSTEM.Data
         }
         public DbSet<Campus> Campuses { get; set; }
         public DbSet<User> Users { get; set; }
-        public DbSet<Students> Student { get; set; }
+        public DbSet<Student> Students { get; set; }
     }
 }
