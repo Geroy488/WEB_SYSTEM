@@ -117,7 +117,7 @@ namespace WEB_SYSTEM.Controllers
             existingStudent.Tel_No = updatedStudent.Tel_No?.Trim();
             existingStudent.Grade = updatedStudent.Grade?.Trim();
             existingStudent.Section = updatedStudent.Section?.Trim();
-
+            
             await _context.SaveChangesAsync();
 
             return Ok("Student updated successfully.");
