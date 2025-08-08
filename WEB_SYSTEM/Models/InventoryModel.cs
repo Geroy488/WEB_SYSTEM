@@ -33,6 +33,15 @@ namespace WEB_SYSTEM.Models
             public string? Grade { get; set; }
             public string? Section { get; set; }
         }
-
+        public class Admin
+        {
+            [Key]
+            [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+            public int StudentId { get; set; }
+            public string? StudentName { get; set; }
+            public string? Grade { get; set; }
+            public string? Section { get; set; }
+            public DateOnly Birthday { get; set; }
+        }
     }
 }

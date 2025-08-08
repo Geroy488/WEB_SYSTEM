@@ -16,11 +16,11 @@ namespace WEB_SYSTEM.Controllers
             _context = context;
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromQuery] string Student_Name, [FromQuery] string Address, [FromQuery] string Tel_No, [FromQuery] string Grade, [FromQuery] string Section)
+        [HttpGet("login")]
+        public async Task<IActionResult> Login([FromQuery] string Student_Name)
         {
             var student = await _context.Students
-                .FirstOrDefaultAsync(s => s.Student_Name == Student_Name && s.Address == Address && s.Tel_No == Tel_No && s.Grade == Grade && s.Section == Section);
+                .FirstOrDefaultAsync(s => s.Student_Name == Student_Name);
 
             if (student == null)
             {
@@ -29,7 +29,7 @@ namespace WEB_SYSTEM.Controllers
 
             return Ok(new { message = "Login successful" });
         }
-        // GET: api/campuses
+        // GET: api/students
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Students>>> GetStudents()
         {
@@ -137,7 +137,7 @@ namespace WEB_SYSTEM.Controllers
             _context.Students.Remove(student);
             await _context.SaveChangesAsync();
 
-            return Ok("Campus deleted successfully.");
+            return Ok("Student deleted successfully.");
         }
     }
 }
